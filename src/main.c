@@ -5,7 +5,7 @@
 
 int main() {
     Contact contacts[MAX_CONTACTS];
-    int nb_contacts = 0;
+    int nb_contacts = charger_contacts(contacts);
     int choix;
 
     while (1) {
@@ -46,6 +46,6 @@ int main() {
             break;
         }
     }
-
+sauvegarder_contacts(contacts, nb_contacts);
     return 0;
 }
