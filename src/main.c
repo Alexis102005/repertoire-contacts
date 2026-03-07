@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "../include/contact.h"
 
-#define MAX_CONTACTS 100
 
 int main() {
     Contact contacts[MAX_CONTACTS];
