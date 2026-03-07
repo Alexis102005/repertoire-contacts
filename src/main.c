@@ -1,26 +1,51 @@
 #include <stdio.h>
 #include "../include/contact.h"
+
+#define MAX_CONTACTS 100
+
 int main() {
-    Contact c;
+    Contact contacts[MAX_CONTACTS];
+    int nb_contacts = 0;
+    int choix;
 
-    printf("=== Répertoire de Contacts ===\n\n");
+    while (1) {
+        printf("\n=== Repertoire de Contacts ===\n");
+        printf("1. Ajouter un contact\n");
+        printf("2. Afficher tous les contacts\n");
+        printf("3. Quitter\n");
+        printf("Choix : ");
+        scanf("%d", &choix);
 
-    printf("Nom : ");
-    scanf("%49s", c.nom);
+        if (choix == 1) {
+            if (nb_contacts >= MAX_CONTACTS) {
+                printf("Repertoire plein !\n");
+                continue;
+            }
+            Contact *c = &contacts[nb_contacts];
+            printf("Nom : ");
+            scanf("%49s", c->nom);
+            printf("Prenom : ");
+            scanf("%49s", c->prenom);
+            printf("Telephone : ");
+            scanf("%19s", c->telephone);
+            printf("Email : ");
+            scanf("%49s", c->email);
+            nb_contacts++;
+            printf("Contact ajoute !\n");
 
-    printf("Prénom : ");
-    scanf("%49s", c.prenom);
+        } else if (choix == 2) {
+            if (nb_contacts == 0) {
+                printf("Aucun contact.\n");
+                continue;
+            }
+            for (int i = 0; i < nb_contacts; i++) {
+                printf("\n[%d] %s %s - %s\n", i+1, contacts[i].prenom, contacts[i].nom, contacts[i].telephone);
+            }
 
-    printf("Téléphone : ");
-    scanf("%19s", c.telephone);
-
-    printf("Email : ");
-    scanf("%49s", c.email);
-
-    printf("\n--- Contact enregistré ---\n");
-    printf("Nom     : %s %s\n", c.prenom, c.nom);
-    printf("Tel     : %s\n", c.telephone);
-    printf("Email   : %s\n", c.email);
+        } else if (choix == 3) {
+            break;
+        }
+    }
 
     return 0;
 }
