@@ -8,11 +8,11 @@ int main() {
     int choix;
 
     while (1) {
-        printf("\n=== Repertoire de Contacts ===\n");
         printf("1. Ajouter un contact\n");
         printf("2. Afficher tous les contacts\n");
-        printf("3. Quitter\n");
-        printf("Choix : ");
+        printf("3. Rechercher un contact\n");
+        printf("4. Supprimer un contact\n");
+        printf("5. Quitter\n");
         scanf("%d", &choix);
 
         if (choix == 1) {
@@ -43,7 +43,15 @@ int main() {
 
         } else if (choix == 3) {
             break;
-        }
+        } else if (choix == 3) {
+    rechercher_contact(contacts, nb_contacts);
+
+} else if (choix == 4) {
+    nb_contacts = supprimer_contact(contacts, nb_contacts);
+
+} else if (choix == 5) {
+    break;
+}
     }
 sauvegarder_contacts(contacts, nb_contacts);
     return 0;

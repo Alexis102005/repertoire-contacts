@@ -14,5 +14,6 @@ typedef struct {
 
 void sauvegarder_contacts(Contact *contacts, int nb);
 int charger_contacts(Contact *contacts);
-
+void rechercher_contact(Contact *contacts, int nb);
+int supprimer_contact(Contact *contacts, int nb);
 #endif
