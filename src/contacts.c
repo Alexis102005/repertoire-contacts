@@ -2,56 +2,82 @@
 #include <string.h>
 #include "../include/contact.h"
 
-void sauvegarder_contacts(Contact *contacts, int nb) {
-    FILE *f = fopen(FICHIER, "wb");
-    if (f == NULL) {
-        printf("Erreur sauvegarde\n");
-        return;
-    }
-    fwrite(&nb, sizeof(int), 1, f);
-    fwrite(contacts, sizeof(Contact), nb, f);
-    fclose(f);
+sqlite3* ouvrir_db() {
+    sqlite3 *db;
+    sqlite3_open("contacts.db", &db);
+    sqlite3_exec(db,
+        "CREATE TABLE IF NOT EXISTS contacts ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "nom TEXT, prenom TEXT, telephone TEXT,"
+        "email TEXT, adresse TEXT);",
+        NULL, NULL, NULL);
+    return db;
 }
 
-int charger_contacts(Contact *contacts) {
-    FILE *f = fopen(FICHIER, "rb");
-    if (f == NULL) return 0;
+void fermer_db(sqlite3 *db) {
+    sqlite3_close(db);
+}
+
+void ajouter_contact(sqlite3 *db, Contact *c) {
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db,
+        "INSERT INTO contacts (nom, prenom, telephone, email, adresse) VALUES (?,?,?,?,?);",
+        -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, c->nom, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, c->prenom, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, c->telephone, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, c->email, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, c->adresse, -1, SQLITE_STATIC);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    printf("Contact ajoute !\n");
+}
+
+int charger_contacts(sqlite3 *db, Contact *contacts) {
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, "SELECT id, nom, prenom, telephone, email FROM contacts;", -1, &stmt, NULL);
     int nb = 0;
-    fread(&nb, sizeof(int), 1, f);
-    fread(contacts, sizeof(Contact), nb, f);
-    fclose(f);
+    while (sqlite3_step(stmt) == SQLITE_ROW && nb < MAX_CONTACTS) {
+        contacts[nb].id = sqlite3_column_int(stmt, 0);
+        strncpy(contacts[nb].nom, (const char*)sqlite3_column_text(stmt, 1), 49);
+        strncpy(contacts[nb].prenom, (const char*)sqlite3_column_text(stmt, 2), 49);
+        strncpy(contacts[nb].telephone, (const char*)sqlite3_column_text(stmt, 3), 19);
+        strncpy(contacts[nb].email, (const char*)sqlite3_column_text(stmt, 4), 49);
+        nb++;
+    }
+    sqlite3_finalize(stmt);
     return nb;
-}void rechercher_contact(Contact *contacts, int nb) {
-    char recherche[50];
-    printf("Nom a rechercher : ");
-    scanf("%49s", recherche);
+}
+
+void rechercher_contact(sqlite3 *db, const char *recherche) {
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db,
+        "SELECT id, nom, prenom, telephone, email FROM contacts WHERE nom LIKE ? OR prenom LIKE ?;",
+        -1, &stmt, NULL);
+    char pattern[52];
+    snprintf(pattern, sizeof(pattern), "%%%s%%", recherche);
+    sqlite3_bind_text(stmt, 1, pattern, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, pattern, -1, SQLITE_STATIC);
 
     int trouve = 0;
-    for (int i = 0; i < nb; i++) {
-        if (strcmp(contacts[i].nom, recherche) == 0 ||
-            strcmp(contacts[i].prenom, recherche) == 0) {
-            printf("\n[%d] %s %s - %s - %s\n", i+1,
-                contacts[i].prenom, contacts[i].nom,
-                contacts[i].telephone, contacts[i].email);
-            trouve = 1;
-        }
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        printf("\n[%d] %s %s - %s - %s\n",
+            sqlite3_column_int(stmt, 0),
+            sqlite3_column_text(stmt, 2),
+            sqlite3_column_text(stmt, 1),
+            sqlite3_column_text(stmt, 3),
+            sqlite3_column_text(stmt, 4));
+        trouve = 1;
     }
     if (!trouve) printf("Aucun contact trouve.\n");
+    sqlite3_finalize(stmt);
 }
 
-int supprimer_contact(Contact *contacts, int nb) {
-    int index;
-    printf("Numero du contact a supprimer : ");
-    scanf("%d", &index);
-    index--;
-
-    if (index < 0 || index >= nb) {
-        printf("Numero invalide.\n");
-        return nb;
-    }
-    for (int i = index; i < nb - 1; i++) {
-        contacts[i] = contacts[i + 1];
-    }
+void supprimer_contact(sqlite3 *db, int id) {
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, "DELETE FROM contacts WHERE id = ?;", -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, id);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
     printf("Contact supprime.\n");
-    return nb - 1;
 }

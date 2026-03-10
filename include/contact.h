@@ -1,10 +1,12 @@
 #ifndef CONTACT_H
 #define CONTACT_H
 
+#include <sqlite3.h>
+
 #define MAX_CONTACTS 100
-#define FICHIER "contacts.dat"
 
 typedef struct {
+    int id;
     char nom[50];
     char prenom[50];
     char telephone[20];
@@ -12,8 +14,11 @@ typedef struct {
     char adresse[100];
 } Contact;
 
-void sauvegarder_contacts(Contact *contacts, int nb);
-int charger_contacts(Contact *contacts);
-void rechercher_contact(Contact *contacts, int nb);
-int supprimer_contact(Contact *contacts, int nb);
+sqlite3* ouvrir_db();
+void fermer_db(sqlite3 *db);
+void ajouter_contact(sqlite3 *db, Contact *c);
+int charger_contacts(sqlite3 *db, Contact *contacts);
+void rechercher_contact(sqlite3 *db, const char *recherche);
+void supprimer_contact(sqlite3 *db, int id);
+
 #endif
