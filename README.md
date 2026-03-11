@@ -1,23 +1,28 @@
 # Répertoire de Contacts
 
-Un gestionnaire de contacts en ligne de commande développé en C.
+Projet personnel développé entièrement par moi, de A à Z.
+Un gestionnaire de contacts construit en 4 technologies différentes autour d'une même base de données SQLite.
 
-## Fonctionnalités
-- Ajouter un contact
-- Rechercher un contact
-- Modifier un contact
-- Supprimer un contact
+## Ce que j'ai construit
 
-## Compilation
+- Un programme en **C** qui tourne dans le terminal
+- Une **API REST** en Python/Flask
+- Une **interface web** en HTML/CSS/JavaScript
+- Une **app mobile** en React Native
+
+## Lancer le projet
+
+API :
 ```bash
-make
+python api/app.py
 ```
 
-## Utilisation
+App mobile :
 ```bash
-./repertoire
+cd mobile && npx expo start
 ```
 
-## Technologies
-- Langage : C
-- Base de données : SQLite (à venir)
+Programme C :
+```bash
+gcc src/main.c src/contacts.c -o repertoire -lsqlite3 && ./repertoire
+```
