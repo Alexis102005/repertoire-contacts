@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Répertoire de Contacts</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        h1 { color: #333; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button.delete { background: #f44336; }
+        .contact { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>📒 Répertoire de Contacts</h1>
+
+    <h2>Ajouter un contact</h2>
+    <input id="nom" placeholder="Nom">
+    <input id="prenom" placeholder="Prénom">
+    <input id="telephone" placeholder="Téléphone">
+    <input id="email" placeholder="Email">
+    <button onclick="ajouterContact()">Ajouter</button>
+
+    <h2>Rechercher</h2>
+    <input id="recherche" placeholder="Nom ou prénom">
+    <button onclick="rechercherContact()">Rechercher</button>
+
+    <h2>Contacts</h2>
+    <button onclick="chargerContacts()">Actualiser</button>
+    <div id="liste-contacts"></div>
+
+    <script>
+        const API = "http://127.0.0.1:5000";
+
+        async function chargerContacts() {
+            const res = await fetch(`${API}/contacts`);
+            const contacts = await res.json();
+            afficherContacts(contacts);
+        }
+
+        async function ajouterContact() {
+            const data = {
+                nom: document.getElementById('nom').value,
+                prenom: document.getElementById('prenom').value,
+                telephone: document.getElementById('telephone').value,
+                email: document.getElementById('email').value,
+                adresse: ""
+            };
+            await fetch(`${API}/contacts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            chargerContacts();
+        }
+
+        async function rechercherContact() {
+            const nom = document.getElementById('recherche').value;
+            const res = await fetch(`${API}/contacts/search?nom=${nom}`);
+            const contacts = await res.json();
+            afficherContacts(contacts);
+        }
+
+        async function supprimerContact(id) {
+            await fetch(`${API}/contacts/${id}`, { method: 'DELETE' });
+            chargerContacts();
+        }
+
+        function afficherContacts(contacts) {
+            const liste = document.getElementById('liste-contacts');
+            if (contacts.length === 0) {
+                liste.innerHTML = '<p>Aucun contact.</p>';
+                return;
+            }
+            liste.innerHTML = contacts.map(c => `
+                <div class="contact">
+                    <strong>${c.prenom} ${c.nom}</strong> — ${c.telephone} — ${c.email}
+                    <button class="delete" onclick="supprimerContact(${c.id})">Supprimer</button>
+                </div>
+            `).join('');
+        }
+
+        chargerContacts();
+    </script>
+</body>
+</html>
